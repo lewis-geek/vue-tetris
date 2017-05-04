@@ -19,45 +19,62 @@ export default {
   name: 'app',
   data () {
     return {
-      layout: [],
+      layout: [],     //布局
       rowNum: 0,
       colNum: 0,
-      shape: [],
+      shape: [],      //当前图形
       shapeIndex: {
         x: 0,
         y: 0
-      },
-      shapeCoord: [],
-      lastShape: []
+      },              //图形顶点
+      // shapeCoord: [], //图形的全部坐标
+      lastShape: []   //更新前的图形
     }
   },
   created() {
-
-
-    this.initLayout(10, 10)
-    this.randomShape()
-    this.initBlock()
-    this.keyEvent()
-    this.handleAnimation()
+    this.initLayout(20, 10)
   },
   watch: {
-    shapeIndex(val, oldVal) {
-
+    shape(val) {
+      // console.table(val);
     },
-    shapeCoord(val) {
+    shapeCoord(val, oldVal) {
+      for(let coord of oldVal) {
+        this.layout[coord.y][coord.x] = 0
+      }
+      this.renderShape()
+    }
+  },
+  computed: {
+    shapeCoord() {
+      let arr = this.computedCoord(this.shape, this.shapeIndex)
 
+      // for(let r = 0; r < this.shape.length; r++) {
+      //   for(let c = 0; c < this.shape[r].length; c++) {
+      //     if (this.shape[r][c] == 1) {
+      //       let obj = {
+      //         x: this.shapeIndex.x + c,
+      //         y: this.shapeIndex.y + r
+      //       }
+      //       arr.push(obj)
+      //     }
+      //   }
+      // }
+
+      return arr
     }
   },
   methods: {
+    /**
+     * [初始化画布]
+     * @param  {[Number]} row [行数]
+     * @param  {[Number]} col [列数]
+     */
     initLayout(row, col) {
       let arr = []
+      let mid = Math.ceil(col / 2)
 
-      this.rowNum = row
-      this.colNum = col
-
-      let mid = Math.ceil(this.rowNum / 2)
-
-      this.shapeIndex = {
+      let shapeIndex = {
         x: mid - 2,
         y: 0
       }
@@ -65,63 +82,21 @@ export default {
       for(let r = 0; r < row; r++) {
         arr.push([])
         for(let c = 0; c < col; c++) {
-          if (c == 0 || c == col - 1 || r == row -1 ) {
-            arr[r].push(1)
-          } else {
             arr[r].push(0)
-          }
         }
       }
 
+      this.rowNum = row
+      this.colNum = col
       this.layout = arr
-    },
-    initBlock() {
-      let blockArr = [[0, 0, 1],[1, 1, 1]]
-      let blockLen = blockArr[0].length
-      let blockMid = Math.ceil(blockLen / 2)
+      this.shapeIndex = shapeIndex
 
-      this.shapeCoord = []
-
-      for(let r = 0; r < this.shape.length; r++) {
-        for(let c = 0; c < this.shape[r].length; c++) {
-          if (this.shape[r][c] == 1) {
-            let obj = {
-              x: this.shapeIndex.x + c,
-              y: this.shapeIndex.y + r
-            }
-            this.shapeCoord.push(obj)
-          }
-        }
-      }
-
-      let collideState = this.collideDetection()
-
-      if (collideState) {
-        this.randomShape()
-        let mid = Math.ceil(this.rowNum / 2)
-
-        for(let coord of this.lastShape) {
-          this.layout[coord.y][coord.x] = 1
-        }
-
-        this.shapeIndex = {
-          x: mid - 2,
-          y: 0
-        }
-        // this.initBlock()
-        return
-      }
-
-      for(let r = 0; r < this.shape.length; r++) {
-        for(let c = 0; c < this.shape[r].length; c++) {
-          if (this.shape[r][c] == 1) {
-            this.layout[this.shapeIndex.y + r][this.shapeIndex.x + c] = this.shape[r][c]
-          }
-        }
-      }
+      this.randomShape()
+      this.keyEvent()
+      // console.log(`顶点坐标 x:${shapeIndex.x} y:${shapeIndex.y}`);
     },
     randomShape() {
-      let random = Math.floor(Math.random() * (6 - 1) + 1)
+      let reandom = Math.floor(Math.random() * (6 - 1) + 1)
 
       switch(1) {
         case 1:
@@ -144,128 +119,110 @@ export default {
           break;
       }
     },
-    rotateShape() {
-      let arr = []
-      let arrLayout = this.layout
-
-      for(let r = 0; r < this.shape.length; r++) {
-        for(let c = 0; c < this.shape.length; c++) {
-          if (this.shape[r][c] == 1) {
-            arrLayout[this.shapeIndex.y + r][this.shapeIndex.x + c] = 0
-          }
-        }
+    renderShape() {
+      for(let coord of this.shapeCoord) {
+        this.layout[coord.y][coord.x] = 1
       }
-
       this.layout.splice()
-
-      for(let r = 0; r < this.shape.length; r++) {
-        arr[r] = []
-        for(let c = 0; c < this.shape[r].length; c++) {
-          arr[r][c] = this.shape[this.shape.length - c - 1][r]
-        }
-      }
-
-      this.shape = arr
-      this.initBlock()
     },
     keyEvent() {
       document.addEventListener('keydown', e => {
-        console.log(e);
         if (e.keyCode == 38) {
-          this.rotateShape()
+          arrowUp()
         }
         if (e.keyCode == 37) {
-          let arrLayout = this.layout
-          let x = this.shapeIndex.x - 1
-          if (x >= 0) {
-            for(let r = 0; r < this.shape.length; r++) {
-              for(let c = 0; c < this.shape.length; c++) {
-                if (this.shape[r][c] == 1) {
-                  arrLayout[this.shapeIndex.y + r][this.shapeIndex.x + c] = 0
-                }
-              }
-            }
-            this.$set(this.shapeIndex, 'x', x)
-          }
+          arrowLeft()
         }
         if (e.keyCode == 39) {
-          let arrLayout = this.layout
-          let x = this.shapeIndex.x + 1
-          if (x < this.rowNum - 1) {
-            for(let r = 0; r < this.shape.length; r++) {
-              for(let c = 0; c < this.shape.length; c++) {
-                if (this.shape[r][c] == 1) {
-                  arrLayout[this.shapeIndex.y + r][this.shapeIndex.x + c] = 0
-                }
-              }
-            }
-            this.$set(this.shapeIndex, 'x', x)
-          }
+          arrowRight()
+        }
+        if (e.keyCode == 40) {
+          arrowDown()
+        }
+        if (e.keyCode == 32) {
+          arrowPause()
         }
       })
+
+      let that = this
+
+      function arrowUp() {
+        that.rotateShape()
+      }
+      function arrowLeft() {
+        
+      }
+      function arrowRight() {
+        console.log('right');
+      }
+      function arrowDown() {
+        console.log('down');
+      }
+      function arrowPause() {
+        console.log('pause');
+      }
     },
-    handleAnimation() {
-      let animation = setInterval(() => {
-        let arrLayout = this.layout
+    rotateShape() {
+      let rotatedShape = []
+      let shape = this.shape
+      let shapeCoord = []
+      let pass = true
 
-        this.lastShape = []
+      for(let r = 0; r < shape.length; r++) {
+        rotatedShape[r] = []
+        for(let c = 0; c < shape[r].length; c++) {
+          rotatedShape[r][c] = shape[shape.length - c - 1][r]
+        }
+      }
 
-        for(let r = 0; r < this.shape.length; r++) {
-          for(let c = 0; c < this.shape.length; c++) {
-            if (this.shape[r][c] == 1 ) {
-              let obj = {
-                x: this.shapeIndex.x + c,
-                y: this.shapeIndex.y + r
-              }
-              arrLayout[this.shapeIndex.y + r][this.shapeIndex.x + c] = 0
-              this.lastShape.push(obj)
+      shapeCoord = this.computedCoord(shape, this.shapeIndex)
+      pass = this.colDetection(shapeCoord)
+
+      if (pass) {
+        this.shape = rotatedShape
+      }
+    },
+    computedCoord(shape, shapeIndex) {
+      let arr = []
+
+      for(let r = 0; r < shape.length; r++) {
+        for(let c = 0; c < shape[r].length; c++) {
+          if (shape[r][c] == 1) {
+            let obj = {
+              x: shapeIndex.x + c,
+              y: shapeIndex.y + r
             }
+            arr.push(obj)
           }
         }
+      }
 
-        let obj = {
-          x: this.shapeIndex.x,
-          y: this.shapeIndex.y
-        }
-
-        obj.y += 1
-
-        this.shapeIndex = obj
-        this.handleClear()
-        this.initBlock()
-        this.layout.splice()
-      }, 1000);
-
-      return animation
+      return arr
     },
-    collideDetection() {
-      for(let coord of this.shapeCoord) {
+    /**
+     * [碰撞检测的方法]
+     * @param  {[Array]} shapeCoord [改变后的图形坐标]
+     */
+    colDetection(shapeCoord) {
+      let pass = true
+
+      for(let coord of shapeCoord) {
+        if (coord.y == this.rowNum - 1) {
+          pass = false
+        }
+        if (coord.x == this.colNum - 1 || coord.x == 0) {
+          pass = false
+        }
         if (this.layout[coord.y][coord.x] == 1) {
-          return true
-        }
-      }
-      return false
-    },
-    handleClear() {
-      for(let r = 0;r < this.layout.length - 1; r++) {
-        let all = true
-        for(let c = 0; c < this.layout[r].length; c++) {
-          if (this.layout[r][c] == 0) {
-            all = false
-          }
-        }
-        if (all) {
-          for(let i = 0; i < this.layout[r].length; i++) {
-            if (i !=0 && i != this.layout[r].length - 1 ) {
-              this.layout[r][i] = 0
+          pass = false
+          for(let c of this.shapeCoord) {
+            if (coord.y == c.y && coord.x == c.x) {
+              pass = true
             }
           }
-
-          for(let j = r; j > 0; j--) {
-            this.layout[j] = this.layout[j - 1]
-          }
         }
       }
+      return pass
     }
   }
 }
