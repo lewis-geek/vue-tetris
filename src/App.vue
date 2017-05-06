@@ -28,39 +28,65 @@ export default {
         y: 0
       },              //图形顶点
       // shapeCoord: [], //图形的全部坐标
-      lastShape: []   //更新前的图形
+      lastShape: [],   //更新前的图形
+      clear: true,
+      intervalObj: -1
     }
   },
   created() {
     this.initLayout(20, 10)
+    this.handleAnimation(1000)
   },
   watch: {
     shape(val) {
       // console.table(val);
     },
     shapeCoord(val, oldVal) {
-      for(let coord of oldVal) {
-        this.layout[coord.y][coord.x] = 0
+
+      if (this.clear) {
+        for(let coord of oldVal) {
+          this.layout[coord.y][coord.x] = 0
+        }
+      } else {
+        let gameOver = false
+        for (let coord of val) {
+          if (this.layout[coord.y][coord.x] == 1) {
+            gameOver = true
+          }
+        }
+
+        if (gameOver) {
+          clearInterval(this.intervalObj)
+          alert('游戏结束');
+          return
+        } else {
+          for(let r = 0; r < this.layout.length; r ++) {
+            let clear = true
+            for(let c = 0; c < this.layout[r].length; c++) {
+               if (this.layout[r][c] == 0) {
+                 clear = false
+               }
+            }
+            if (clear) {
+              let arr = []
+
+              this.layout.splice(r, 1)
+              for(let i = 0; i < this.colNum; i++) {
+                arr.push(0)
+              }
+              this.layout.unshift(arr)
+            }
+          }
+        }
       }
+
+      this.clear = true
       this.renderShape()
     }
   },
   computed: {
     shapeCoord() {
       let arr = this.computedCoord(this.shape, this.shapeIndex)
-
-      // for(let r = 0; r < this.shape.length; r++) {
-      //   for(let c = 0; c < this.shape[r].length; c++) {
-      //     if (this.shape[r][c] == 1) {
-      //       let obj = {
-      //         x: this.shapeIndex.x + c,
-      //         y: this.shapeIndex.y + r
-      //       }
-      //       arr.push(obj)
-      //     }
-      //   }
-      // }
-
       return arr
     }
   },
@@ -76,7 +102,7 @@ export default {
 
       let shapeIndex = {
         x: mid - 2,
-        y: 0
+        y: -1
       }
 
       for(let r = 0; r < row; r++) {
@@ -95,18 +121,28 @@ export default {
       this.keyEvent()
       // console.log(`顶点坐标 x:${shapeIndex.x} y:${shapeIndex.y}`);
     },
+    initShapeIndex() {
+      let mid = Math.ceil(this.colNum / 2)
+
+      let shapeIndex = {
+        x: mid - 2,
+        y: -1
+      }
+
+      this.shapeIndex = shapeIndex
+    },
     randomShape() {
       let reandom = Math.floor(Math.random() * (6 - 1) + 1)
 
-      switch(1) {
+      switch(6) {
         case 1:
-          this.shape = [[0,1,0,0],[0,1,0,0],[0,1,1,0],[0,0,0,0]];
+          this.shape = [[0,0,0,0],[0,0,1,0],[1,1,1,0],[0,0,0,0]];
           break;
         case 2:
           this.shape = [[0,0,0,0],[0,1,1,0],[0,1,1,0],[0,0,0,0]];
           break;
         case 3:
-          this.shape = [[0,0,1,0],[0,0,1,0],[0,1,1,0],[0,0,0,0]];
+          this.shape = [[0,0,0,0],[0,1,0,0],[0,1,1,1],[0,0,0,0]];
           break;
         case 4:
           this.shape = [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]];
@@ -118,6 +154,7 @@ export default {
           this.shape = [[0,0,0,0],[0,1,1,1],[0,0,1,0],[0,0,0,0]];
           break;
       }
+
     },
     renderShape() {
       for(let coord of this.shapeCoord) {
@@ -150,13 +187,69 @@ export default {
         that.rotateShape()
       }
       function arrowLeft() {
-        
+        let shapeCoord = []
+        let shape = that.shape
+        let pass = false
+        let canDown = that.canMoveDown()
+        let newShapeIndex = {
+          x: that.shapeIndex.x - 1,
+          y: that.shapeIndex.y
+        }
+
+        for (let coord of that.shapeCoord) {
+          if (coord.x - 1 < 0) {
+            return
+          }
+        }
+
+        shapeCoord = that.computedCoord(that.shape, newShapeIndex)
+        pass = that.colDetection(shapeCoord)
+
+        if (pass) {
+          that.shapeIndex = newShapeIndex
+        } else {
+          if (canDown) {
+            return
+          } else {
+            that.clear = false
+            that.randomShape()
+            that.initShapeIndex()
+          }
+        }
       }
       function arrowRight() {
-        console.log('right');
+        let shapeCoord = []
+        let shape = that.shape
+        let pass = false
+        let canDown = that.canMoveDown()
+        let newShapeIndex = {
+          x: that.shapeIndex.x + 1,
+          y: that.shapeIndex.y
+        }
+
+        for (let coord of that.shapeCoord) {
+          if (coord.x + 1 > that.colNum - 1) {
+            return
+          }
+        }
+
+        shapeCoord = that.computedCoord(that.shape, newShapeIndex)
+        pass = that.colDetection(shapeCoord)
+
+        if (pass) {
+          that.shapeIndex = newShapeIndex
+        } else {
+          if (canDown) {
+            return
+          } else {
+            that.clear = false
+            that.randomShape()
+            that.initShapeIndex()
+          }
+        }
       }
       function arrowDown() {
-        console.log('down');
+        that.moveDown()
       }
       function arrowPause() {
         console.log('pause');
@@ -175,7 +268,7 @@ export default {
         }
       }
 
-      shapeCoord = this.computedCoord(shape, this.shapeIndex)
+      shapeCoord = this.computedCoord(rotatedShape, this.shapeIndex)
       pass = this.colDetection(shapeCoord)
 
       if (pass) {
@@ -196,22 +289,81 @@ export default {
           }
         }
       }
-
       return arr
     },
     /**
      * [碰撞检测的方法]
      * @param  {[Array]} shapeCoord [改变后的图形坐标]
      */
+    moveDown() {
+      let shapeCoord = []
+      let shape = this.shape
+      let pass = false
+      let newShapeIndex = {
+        x: this.shapeIndex.x,
+        y: this.shapeIndex.y + 1
+      }
+
+      for (let coord of this.shapeCoord) {
+        if (coord.y + 1 > this.rowNum - 1) {
+          this.clear = false
+          this.randomShape()
+          this.initShapeIndex()
+          return
+        }
+      }
+
+      shapeCoord = this.computedCoord(this.shape, newShapeIndex)
+      pass = this.colDetection(shapeCoord)
+
+
+      if (pass) {
+        this.shapeIndex = newShapeIndex
+      } else {
+        this.clear = false
+        this.randomShape()
+        this.initShapeIndex()
+      }
+    },
+    handleAnimation(time) {
+      this.intervalObj = setInterval(() => {
+        this.moveDown()
+      }, time);
+    },
+    canMoveDown() {
+      let shapeCoord = []
+      let shape = this.shape
+      let pass = false
+      let newShapeIndex = {
+        x: this.shapeIndex.x,
+        y: this.shapeIndex.y + 1
+      }
+
+      for (let coord of this.shapeCoord) {
+        if (coord.y + 1 > this.rowNum - 1) {
+          return false
+        }
+      }
+
+      shapeCoord = this.computedCoord(this.shape, newShapeIndex)
+      pass = this.colDetection(shapeCoord)
+
+
+      if (pass) {
+        return true
+      } else {
+        return false
+      }
+    },
     colDetection(shapeCoord) {
       let pass = true
 
       for(let coord of shapeCoord) {
-        if (coord.y == this.rowNum - 1) {
-          pass = false
+        if (coord.y > this.rowNum - 1) {
+          return false
         }
-        if (coord.x == this.colNum - 1 || coord.x == 0) {
-          pass = false
+        if (coord.x > this.colNum - 1 || coord.x < 0) {
+          return false
         }
         if (this.layout[coord.y][coord.x] == 1) {
           pass = false
@@ -220,10 +372,13 @@ export default {
               pass = true
             }
           }
+          if (pass == false) {
+            return false
+          }
         }
       }
       return pass
-    }
+    },
   }
 }
 </script>

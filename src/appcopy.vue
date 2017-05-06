@@ -59,9 +59,6 @@ export default {
         x: mid - 2,
         y: 0
       }
-
-
-
     },
     initBlock() {
       let blockArr = [[0, 0, 1],[1, 1, 1]]
@@ -173,11 +170,7 @@ export default {
         }
 
         this.layout.splice()
-
         this.shape = arr
-
-
-
         this.initBlock()
       }
     },
