@@ -3,11 +3,38 @@
     <div class="layout">
       <div
         class="layout-row"
-        v-for="row in layout">
+        v-for="(row, rowIndex) in layout">
         <div
           class="layout-cell"
-          v-for="cell in row">
-          {{ cell }}
+          :class="layoutColor[rowIndex][cellIndex]"
+          v-for="(cell, cellIndex) in row">
+      </div>
+      </div>
+    </div>
+    <div class="control">
+      <div class="control-left">
+        <div class="button rotate-button">
+
+        </div>
+      </div>
+      <div class="control-right">
+        <div class="drop">
+          <div class="button drop-button">
+
+          </div>
+        </div>
+        <div class="left-right">
+          <div class="button left-button">
+
+          </div>
+          <div class="button right-button">
+
+          </div>
+        </div>
+        <div class="down">
+          <div class="button down-button">
+
+          </div>
         </div>
       </div>
     </div>
@@ -30,22 +57,35 @@ export default {
       // shapeCoord: [], //图形的全部坐标
       lastShape: [],   //更新前的图形
       clear: true,
-      intervalObj: -1
+      intervalObj: -1,
+      currentColor: '',
+      layoutColor: [],
+      lastReandomColor: 0,
+      currentScore: 0,
+      bestScore: 0,
+      globalScore: [],
+      clearLine: 0
     }
   },
   created() {
     this.initLayout(20, 10)
-    this.handleAnimation(1000)
+    // this.handleAnimation(1000)
+  },
+  mounted() {
+    this.buttonEvent()
   },
   watch: {
     shape(val) {
       // console.table(val);
     },
+    layoutColor(val) {
+      // console.table(val)
+    },
     shapeCoord(val, oldVal) {
-
       if (this.clear) {
         for(let coord of oldVal) {
           this.layout[coord.y][coord.x] = 0
+          this.layoutColor[coord.y][coord.x] = ''
         }
       } else {
         let gameOver = false
@@ -69,12 +109,15 @@ export default {
             }
             if (clear) {
               let arr = []
-
+              let arrColor = []
               this.layout.splice(r, 1)
+              this.layoutColor.splice(r, 1)
               for(let i = 0; i < this.colNum; i++) {
                 arr.push(0)
+                arrColor.push('')
               }
               this.layout.unshift(arr)
+              this.layoutColor.unshift(arrColor)
             }
           }
         }
@@ -82,6 +125,11 @@ export default {
 
       this.clear = true
       this.renderShape()
+    },
+    currentScore(val) {
+      if (val > this.bestScore) {
+        this.bestScore = val
+      }
     }
   },
   computed: {
@@ -98,6 +146,7 @@ export default {
      */
     initLayout(row, col) {
       let arr = []
+      let arrColor = []
       let mid = Math.ceil(col / 2)
 
       let shapeIndex = {
@@ -107,14 +156,17 @@ export default {
 
       for(let r = 0; r < row; r++) {
         arr.push([])
+        arrColor.push([])
         for(let c = 0; c < col; c++) {
             arr[r].push(0)
+            arrColor[r].push('')
         }
       }
 
       this.rowNum = row
       this.colNum = col
       this.layout = arr
+      this.layoutColor = arrColor
       this.shapeIndex = shapeIndex
 
       this.randomShape()
@@ -132,9 +184,32 @@ export default {
       this.shapeIndex = shapeIndex
     },
     randomShape() {
-      let reandom = Math.floor(Math.random() * (6 - 1) + 1)
+      let reandom = Math.floor(Math.random() * (7 - 1) + 1)
+      let reandomColor = reandomColor = Math.floor(Math.random() * (5 - 1) + 1)
+      let lastReandomColor = this.lastReandomColor
 
-      switch(6) {
+      while (reandomColor == lastReandomColor) {
+        reandomColor = reandomColor = Math.floor(Math.random() * (4 - 1) + 1)
+      }
+
+      switch (reandomColor) {
+        case 1:
+          this.currentColor = 'turquoise'
+          break;
+        case 2:
+          this.currentColor = 'emerald'
+          break;
+        case 3:
+          this.currentColor = 'peter-river'
+          break;
+        case 4:
+          this.currentColor = 'amethyst'
+          break;
+      }
+
+      this.lastReandomColor = reandomColor
+
+      switch(reandom) {
         case 1:
           this.shape = [[0,0,0,0],[0,0,1,0],[1,1,1,0],[0,0,0,0]];
           break;
@@ -151,7 +226,7 @@ export default {
           this.shape = [[0,0,0,0],[0,1,1,0],[0,0,1,1],[0,0,0,0]];
           break;
         case 6:
-          this.shape = [[0,0,0,0],[0,1,1,1],[0,0,1,0],[0,0,0,0]];
+          this.shape = [[0,0,0,0],[0,0,1,0],[0,1,1,1],[0,0,0,0]];
           break;
       }
 
@@ -159,7 +234,9 @@ export default {
     renderShape() {
       for(let coord of this.shapeCoord) {
         this.layout[coord.y][coord.x] = 1
+        this.layoutColor[coord.y][coord.x] = this.currentColor
       }
+      this.layoutColor.splice()
       this.layout.splice()
     },
     keyEvent() {
@@ -187,73 +264,46 @@ export default {
         that.rotateShape()
       }
       function arrowLeft() {
-        let shapeCoord = []
-        let shape = that.shape
-        let pass = false
-        let canDown = that.canMoveDown()
-        let newShapeIndex = {
-          x: that.shapeIndex.x - 1,
-          y: that.shapeIndex.y
-        }
-
-        for (let coord of that.shapeCoord) {
-          if (coord.x - 1 < 0) {
-            return
-          }
-        }
-
-        shapeCoord = that.computedCoord(that.shape, newShapeIndex)
-        pass = that.colDetection(shapeCoord)
-
-        if (pass) {
-          that.shapeIndex = newShapeIndex
-        } else {
-          if (canDown) {
-            return
-          } else {
-            that.clear = false
-            that.randomShape()
-            that.initShapeIndex()
-          }
-        }
+        that.moveLeft()
       }
       function arrowRight() {
-        let shapeCoord = []
-        let shape = that.shape
-        let pass = false
-        let canDown = that.canMoveDown()
-        let newShapeIndex = {
-          x: that.shapeIndex.x + 1,
-          y: that.shapeIndex.y
-        }
-
-        for (let coord of that.shapeCoord) {
-          if (coord.x + 1 > that.colNum - 1) {
-            return
-          }
-        }
-
-        shapeCoord = that.computedCoord(that.shape, newShapeIndex)
-        pass = that.colDetection(shapeCoord)
-
-        if (pass) {
-          that.shapeIndex = newShapeIndex
-        } else {
-          if (canDown) {
-            return
-          } else {
-            that.clear = false
-            that.randomShape()
-            that.initShapeIndex()
-          }
-        }
+        that.moveRight()
       }
       function arrowDown() {
-        that.moveDown()
+        let addScore = that.moveDown()
+        if (addScore) {
+          that.currentScore += 1
+        }
       }
       function arrowPause() {
         console.log('pause');
       }
+    },
+    buttonEvent() {
+      let rotateButton = document.querySelector('.rotate-button')
+      let dropButton = document.querySelector('.drop-button')
+      let leftButton = document.querySelector('.left-button')
+      let rightButton = document.querySelector('.right-button')
+      let downButton = document.querySelector('.down-button')
+
+      rotateButton.addEventListener('click', () => {
+        this.rotateShape()
+      })
+
+      leftButton.addEventListener('click', () => {
+        this.moveLeft()
+      })
+
+      rightButton.addEventListener('click', () => {
+        this.moveRight()
+      })
+
+      downButton.addEventListener('click', () => {
+        let addScore = this.moveDown()
+        if (addScore) {
+          this.currentScore += 1
+        }
+      })
     },
     rotateShape() {
       let rotatedShape = []
@@ -316,13 +366,76 @@ export default {
       shapeCoord = this.computedCoord(this.shape, newShapeIndex)
       pass = this.colDetection(shapeCoord)
 
-
       if (pass) {
         this.shapeIndex = newShapeIndex
       } else {
         this.clear = false
         this.randomShape()
         this.initShapeIndex()
+      }
+
+      return pass
+    },
+    moveLeft() {
+      let shapeCoord = []
+      let shape = this.shape
+      let pass = false
+      let canDown = this.canMoveDown()
+      let newShapeIndex = {
+        x: this.shapeIndex.x - 1,
+        y: this.shapeIndex.y
+      }
+
+      for (let coord of this.shapeCoord) {
+        if (coord.x - 1 < 0) {
+          return
+        }
+      }
+
+      shapeCoord = this.computedCoord(this.shape, newShapeIndex)
+      pass = this.colDetection(shapeCoord)
+
+      if (pass) {
+        this.shapeIndex = newShapeIndex
+      } else {
+        if (canDown) {
+          return
+        } else {
+          this.clear = false
+          this.randomShape()
+          this.initShapeIndex()
+        }
+      }
+    },
+    moveRight() {
+      let shapeCoord = []
+      let shape = this.shape
+      let pass = false
+      let canDown = this.canMoveDown()
+      let newShapeIndex = {
+        x: this.shapeIndex.x + 1,
+        y: this.shapeIndex.y
+      }
+
+      for (let coord of this.shapeCoord) {
+        if (coord.x + 1 > this.colNum - 1) {
+          return
+        }
+      }
+
+      shapeCoord = this.computedCoord(this.shape, newShapeIndex)
+      pass = this.colDetection(shapeCoord)
+
+      if (pass) {
+        this.shapeIndex = newShapeIndex
+      } else {
+        if (canDown) {
+          return
+        } else {
+          this.clear = false
+          this.randomShape()
+          this.initShapeIndex()
+        }
       }
     },
     handleAnimation(time) {
@@ -359,7 +472,7 @@ export default {
       let pass = true
 
       for(let coord of shapeCoord) {
-        if (coord.y > this.rowNum - 1) {
+        if (coord.y > this.rowNum - 1 || coord.y < 0) {
           return false
         }
         if (coord.x > this.colNum - 1 || coord.x < 0) {
@@ -389,12 +502,21 @@ export default {
   padding: 0;
 }
 
+#app {
+  background-color: #223436;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 40px 0;
+  box-sizing: border-box;
+}
+
 .layout {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
 }
 
 .layout-row {
@@ -407,5 +529,93 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  background-color: #192122;
+  margin: .5px;
+  border-radius: 2px;
+}
+
+.layout-cell.turquoise {
+  background-color: #f1c40f
+}
+
+.layout-cell.emerald {
+  background-color: #2ecc71
+}
+
+.layout-cell.peter-river {
+  background-color: #3498db
+}
+
+.layout-cell.amethyst {
+  background-color: #9b59b6
+}
+
+.control {
+  display: flex;
+}
+
+.control > div {
+  width: 50%;
+}
+
+.control-left {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.control-left {
+}
+
+.control-left .rotate-button {
+  width: 80px;
+  height: 80px;
+  margin-right: 40px;
+  border-radius: 50%;
+}
+
+.control-right {
+  display: flex;
+  flex-direction: column;
+}
+
+.control-right > div {
+  display: flex;
+  width: 120px;
+}
+.control-right .drop,
+.control-right .down {
+  justify-content: center;
+}
+
+.control-right .left-right {
+  justify-content: space-between;
+}
+
+.control-right .button{
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.control .button {
+  position: relative;
+  overflow: hidden;
+  background-color: #fff;
+  background: linear-gradient(rgb(222, 222, 222), rgb(253, 253, 253));
+  box-shadow: 0 3px 5px rgba(0,0,0,0.25),
+  inset 0 1px 0 rgba(255,255,255,0.3),
+  inset 0 -5px 5px rgba(100,100,100,0.1),
+  inset 0 5px 5px rgba(255,255,255,0.3);
+}
+
+.control .button:active::after {
+  position: absolute;
+  content: '';
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, .3);
 }
 </style>
