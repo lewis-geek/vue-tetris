@@ -13,28 +13,18 @@
     </div>
     <div class="control">
       <div class="control-left">
-        <div class="button rotate-button">
-
-        </div>
+        <div class="button rotate-button"></div>
       </div>
       <div class="control-right">
         <div class="drop">
-          <div class="button drop-button">
-
-          </div>
+          <div class="button drop-button"></div>
         </div>
         <div class="left-right">
-          <div class="button left-button">
-
-          </div>
-          <div class="button right-button">
-
-          </div>
+          <div class="button left-button"></div>
+          <div class="button right-button"></div>
         </div>
         <div class="down">
-          <div class="button down-button">
-
-          </div>
+          <div class="button down-button"></div>
         </div>
       </div>
     </div>
@@ -68,8 +58,12 @@ export default {
     }
   },
   created() {
+    let bestScore = localStorage.getItem('bestScore')
+    if (!!bestScore) {
+      this.bestScore = bestScore
+    }
     this.initLayout(20, 10)
-    // this.handleAnimation(1000)
+    this.handleAnimation(800)
   },
   mounted() {
     this.buttonEvent()
@@ -129,6 +123,7 @@ export default {
     currentScore(val) {
       if (val > this.bestScore) {
         this.bestScore = val
+        localStorage.setItem('bestScore', val)
       }
     }
   },
@@ -256,12 +251,15 @@ export default {
         if (e.keyCode == 32) {
           arrowPause()
         }
+        if (e.keyCode == 90) {
+          keyZ()
+        }
       })
 
       let that = this
 
       function arrowUp() {
-        that.rotateShape()
+        that.moveDrop()
       }
       function arrowLeft() {
         that.moveLeft()
@@ -278,6 +276,9 @@ export default {
       function arrowPause() {
         console.log('pause');
       }
+      function keyZ() {
+        that.rotateShape()
+      }
     },
     buttonEvent() {
       let rotateButton = document.querySelector('.rotate-button')
@@ -288,6 +289,10 @@ export default {
 
       rotateButton.addEventListener('click', () => {
         this.rotateShape()
+      })
+
+      dropButton.addEventListener('click', () => {
+        this.moveDrop()
       })
 
       leftButton.addEventListener('click', () => {
@@ -438,6 +443,23 @@ export default {
         }
       }
     },
+    moveDrop() {
+      let pass = true
+
+      let ID = setInterval(()=>{
+        pass = this.moveDown()
+
+        for (let coord of this.shapeCoord) {
+          if (coord.y + 1 > this.rowNum - 1) {
+            clearInterval(ID)
+          }
+        }
+
+        if (pass == false) {
+          clearInterval(ID)
+        }
+      },0)
+    },
     handleAnimation(time) {
       this.intervalObj = setInterval(() => {
         this.moveDown()
@@ -504,11 +526,11 @@ export default {
 
 #app {
   background-color: #223436;
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  padding: 40px 0;
+  /*justify-content: space-between;*/
+  padding: 20px 0 10px;
   box-sizing: border-box;
 }
 
@@ -552,6 +574,7 @@ export default {
 
 .control {
   display: flex;
+  margin-top: 20px;
 }
 
 .control > div {
@@ -607,6 +630,7 @@ export default {
   inset 0 1px 0 rgba(255,255,255,0.3),
   inset 0 -5px 5px rgba(100,100,100,0.1),
   inset 0 5px 5px rgba(255,255,255,0.3);
+  user-select: none;
 }
 
 .control .button:active::after {
