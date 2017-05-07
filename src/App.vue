@@ -1,17 +1,40 @@
 <template>
   <div id="app">
-    <div class="layout">
-      <div
-        class="layout-row"
-        v-for="(row, rowIndex) in layout">
+    <div
+      class="layout-container"
+      v-show="!rankView">
+      <div class="layout">
         <div
-          class="layout-cell"
-          :class="layoutColor[rowIndex][cellIndex]"
-          v-for="(cell, cellIndex) in row">
+          class="layout-row"
+          v-for="(row, rowIndex) in layout">
+          <div
+            class="layout-cell"
+            :class="layoutColor[rowIndex][cellIndex]"
+            v-for="(cell, cellIndex) in row">
+          </div>
+        </div>
       </div>
+      <div class="layout-right">
+        <div class="best-score">
+          <span>BEST</span>
+          {{ this.bestScore }}
+        </div>
+        <div class="current-score">
+          <span>SCORE</span>
+          {{ this.currentScore }}
+        </div>
+        <div class="clear-line">
+          <span>LINE</span>
+          {{ this.clearLine }}
+        </div>
+        <div class="globale-score">
+          RANK
+        </div>
       </div>
     </div>
-    <div class="control">
+    <div
+      class="control"
+      v-show="!rankView">
       <div class="control-left">
         <div class="button rotate-button"></div>
       </div>
@@ -28,10 +51,46 @@
         </div>
       </div>
     </div>
+    <div
+      class="rank-view"
+      v-show="rankView">
+      <div class="rank-container">
+        <div
+          class="person">
+          <div class="score">
+            Score
+          </div>
+          <div class="line">
+            Line
+          </div>
+          <div class="string">
+            Player
+          </div>
+        </div>
+        <div
+          class="person"
+          v-for="item in this.globalScore">
+          <div class="score">
+            {{item.score}}
+          </div>
+          <div class="line">
+            {{item.line}}
+          </div>
+          <div class="string">
+            {{item.string}}
+          </div>
+        </div>
+      </div>
+      <div class="rank-view-close">
+        X
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
+import wilddog from 'wilddog'
+
 export default {
   name: 'app',
   data () {
@@ -54,7 +113,9 @@ export default {
       currentScore: 0,
       bestScore: 0,
       globalScore: [],
-      clearLine: 0
+      clearLine: 0,
+      $ref: '',
+      rankView: false
     }
   },
   created() {
@@ -62,8 +123,10 @@ export default {
     if (!!bestScore) {
       this.bestScore = bestScore
     }
-    this.initLayout(20, 10)
+    this.initLayout(19, 10)
     this.handleAnimation(800)
+    this.keyEvent()
+    this.initData()
   },
   mounted() {
     this.buttonEvent()
@@ -91,7 +154,7 @@ export default {
 
         if (gameOver) {
           clearInterval(this.intervalObj)
-          alert('游戏结束');
+          this.handleGameOver()
           return
         } else {
           for(let r = 0; r < this.layout.length; r ++) {
@@ -110,6 +173,7 @@ export default {
                 arr.push(0)
                 arrColor.push('')
               }
+              this.clearLine += 1
               this.layout.unshift(arr)
               this.layoutColor.unshift(arrColor)
             }
@@ -121,10 +185,18 @@ export default {
       this.renderShape()
     },
     currentScore(val) {
+      console.log(val);
       if (val > this.bestScore) {
         this.bestScore = val
         localStorage.setItem('bestScore', val)
       }
+    },
+    clearLine(val, oldVal) {
+      let clearLineNum = val - oldVal
+      this.currentScore += clearLineNum * 100 * clearLineNum
+    },
+    globalScore(val) {
+      console.log(JSON.stringify(val));
     }
   },
   computed: {
@@ -139,6 +211,18 @@ export default {
      * @param  {[Number]} row [行数]
      * @param  {[Number]} col [列数]
      */
+    initData() {
+      let config = {
+        syncURL : 'https://vue-tetris.wilddogio.com'
+      }
+      wilddog.initializeApp(config)
+      this.$ref = wilddog.sync().ref()
+
+      this.$ref.on('value',(snapshot) => {
+        let data = snapshot.val()
+        this.globalScore = JSON.parse(data.globalScore);
+      })
+    },
     initLayout(row, col) {
       let arr = []
       let arrColor = []
@@ -163,9 +247,10 @@ export default {
       this.layout = arr
       this.layoutColor = arrColor
       this.shapeIndex = shapeIndex
-
+      this.currentScore = 0
+      this.clear = true
+      this.clearLine = 0
       this.randomShape()
-      this.keyEvent()
       // console.log(`顶点坐标 x:${shapeIndex.x} y:${shapeIndex.y}`);
     },
     initShapeIndex() {
@@ -286,6 +371,8 @@ export default {
       let leftButton = document.querySelector('.left-button')
       let rightButton = document.querySelector('.right-button')
       let downButton = document.querySelector('.down-button')
+      let rankButton = document.querySelector('.globale-score')
+      let rankClose = document.querySelector('.rank-view-close')
 
       rotateButton.addEventListener('click', () => {
         this.rotateShape()
@@ -308,6 +395,16 @@ export default {
         if (addScore) {
           this.currentScore += 1
         }
+      })
+
+      rankButton.addEventListener('click', () => {
+        this.rankView = !this.rankView
+        clearInterval(this.intervalObj)
+      })
+
+      rankClose.addEventListener('click', () => {
+        this.rankView = !this.rankView
+        this.handleAnimation(800)
       })
     },
     rotateShape() {
@@ -448,7 +545,7 @@ export default {
 
       let ID = setInterval(()=>{
         pass = this.moveDown()
-
+        this.currentScore += 5
         for (let coord of this.shapeCoord) {
           if (coord.y + 1 > this.rowNum - 1) {
             clearInterval(ID)
@@ -464,6 +561,40 @@ export default {
       this.intervalObj = setInterval(() => {
         this.moveDown()
       }, time);
+    },
+    handleGameOver() {
+      let lastGlobalScore = this.globalScore[this.globalScore.length - 1].score
+
+      if (lastGlobalScore <= this.currentScore) {
+        alert('恭喜您进入全球榜!')
+        let string = prompt('请留下您的大名')
+
+        let obj = {
+          score: this.currentScore,
+          line: this.clearLine,
+          string: string
+        }
+
+        this.globalScore.pop()
+        this.globalScore.push(obj)
+
+        this.globalScore.sort((a, b) => {
+          return b.score - a.score
+        })
+
+        let globalScoreJSON = JSON.stringify(this.globalScore);
+
+        this.$ref.set({
+          'globalScore': globalScoreJSON
+        })
+      }
+
+      let again = confirm('再来一局？');
+
+      if (again) {
+        this.initLayout(19, 10)
+        this.handleAnimation(800)
+      }
     },
     canMoveDown() {
       let shapeCoord = []
@@ -524,14 +655,23 @@ export default {
   padding: 0;
 }
 
+body {
+  font-family: "SF Pro SC","SF Pro Text","SF Pro Icons","PingFang SC","Helvetica Neue","Helvetica","Arial",sans-serif;
+}
+
 #app {
   background-color: #223436;
   height: 100vh;
   display: flex;
   flex-direction: column;
   /*justify-content: space-between;*/
-  padding: 20px 0 10px;
+  padding: 15px 0 10px;
   box-sizing: border-box;
+}
+
+.layout-container {
+  display: flex;
+  justify-content: center;
 }
 
 .layout {
@@ -539,6 +679,9 @@ export default {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  border: 1px solid #000;
+  border-radius: 3px;
+  padding: 5px;
 }
 
 .layout-row {
@@ -572,9 +715,27 @@ export default {
   background-color: #9b59b6
 }
 
+.layout-right {
+  margin-left: 10px;
+}
+
+.layout-right .best-score {
+  /*margin-top: 1px;*/
+}
+
+.layout-right > div {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #000;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 5px;
+  border-radius: 3px;
+}
+
 .control {
   display: flex;
-  margin-top: 20px;
+  margin-top: 10px;
 }
 
 .control > div {
@@ -588,6 +749,7 @@ export default {
 }
 
 .control-left {
+
 }
 
 .control-left .rotate-button {
@@ -616,8 +778,8 @@ export default {
 }
 
 .control-right .button{
-  width: 40px;
-  height: 40px;
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
 }
 
@@ -642,4 +804,52 @@ export default {
   bottom: 0;
   background-color: rgba(0, 0, 0, .3);
 }
+
+.control .drop-button {
+  transform: translateY(5px);
+}
+
+.control .down-button {
+  transform: translateY(-5px);
+}
+
+.rank-view {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #edd;
+}
+
+.rank-container {
+  padding: 10px 5px;
+  border: 1px solid #edd;
+  border-radius: 3px;
+}
+
+.rank-view .person {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-width: 65vw;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.rank-view .person > div {
+  min-width: 4em;
+}
+
+.rank-view-close {
+  margin-top: 20px;
+  width: 25px;
+  height: 25px;
+  border: 1px solid #edd;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 </style>
