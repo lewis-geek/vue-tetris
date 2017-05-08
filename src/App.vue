@@ -85,11 +85,17 @@
         X
       </div>
     </div>
+    <audio class="audio-down" src="/dist/down.mp3"></audio>
+    <audio class="audio-clear" src="/dist/clear.mp3"></audio>
+    <audio class="audio-over" src="/dist/over.mp3"></audio>
   </div>
 </template>
 
 <script>
 import wilddog from 'wilddog'
+import './assets/down.mp3'
+import './assets/clear.mp3'
+import './assets/over.mp3'
 
 export default {
   name: 'app',
@@ -115,7 +121,10 @@ export default {
       globalScore: [],
       clearLine: 0,
       $ref: '',
-      rankView: false
+      rankView: false,
+      audioDown: '',
+      audioClear: '',
+      audioOver: ''
     }
   },
   created() {
@@ -129,6 +138,11 @@ export default {
     this.initData()
   },
   mounted() {
+
+    this.audioDown = document.querySelector('.audio-down')
+    this.audioClear = document.querySelector('.audio-clear')
+    this.audioOver = document.querySelector('.audio-over')
+
     this.buttonEvent()
   },
   watch: {
@@ -167,6 +181,8 @@ export default {
             if (clear) {
               let arr = []
               let arrColor = []
+              this.audioClear.currentTime = 0
+              this.audioClear.play()
               this.layout.splice(r, 1)
               this.layoutColor.splice(r, 1)
               for(let i = 0; i < this.colNum; i++) {
@@ -470,6 +486,7 @@ export default {
 
       if (pass) {
         this.shapeIndex = newShapeIndex
+
       } else {
         this.clear = false
         this.randomShape()
@@ -499,6 +516,7 @@ export default {
 
       if (pass) {
         this.shapeIndex = newShapeIndex
+
       } else {
         if (canDown) {
           return
@@ -564,7 +582,8 @@ export default {
     },
     handleGameOver() {
       let lastGlobalScore = this.globalScore[this.globalScore.length - 1].score
-
+      this.audioOver.currentTime = 0
+      this.audioOver.play()
       if (lastGlobalScore <= this.currentScore) {
         alert('恭喜您进入全球榜!')
         let string = prompt('请留下您的大名')
