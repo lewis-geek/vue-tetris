@@ -1,13 +1,13 @@
 <template>
   <div id="app">
     <div class="layout-container"
-         v-show="!rankView">
+      v-show="!rankView">
       <div class="layout">
         <div class="layout-row"
-             v-for="(row, rowIndex) in layout">
+          v-for="(row, rowIndex) in layout">
           <div class="layout-cell"
-               :class="layoutColor[rowIndex][cellIndex]"
-               v-for="(cell, cellIndex) in row">
+            :class="layoutColor[rowIndex][cellIndex]"
+            v-for="(cell, cellIndex) in row">
           </div>
         </div>
       </div>
@@ -25,12 +25,13 @@
           {{ this.clearLine }}
         </div>
         <div class="globale-score">
+          <span>PAUSE</span>
           RANK
         </div>
       </div>
     </div>
     <div class="control"
-         v-show="!rankView">
+      v-show="!rankView">
       <div class="control-left">
         <div class="button rotate-button"></div>
       </div>
@@ -48,7 +49,7 @@
       </div>
     </div>
     <div class="rank-view"
-         v-show="rankView">
+      v-show="rankView">
       <div class="rank-container">
         <div class="person">
           <div class="score">
@@ -62,7 +63,7 @@
           </div>
         </div>
         <div class="person"
-             v-for="item in this.globalScore">
+          v-for="item in this.globalScore">
           <div class="score">
             {{item.score}}
           </div>
@@ -79,11 +80,11 @@
       </div>
     </div>
     <audio class="audio-down"
-           src="/dist/down.mp3"></audio>
+      src="/dist/down.mp3"></audio>
     <audio class="audio-clear"
-           src="/dist/clear.mp3"></audio>
+      src="/dist/clear.mp3"></audio>
     <audio class="audio-over"
-           src="/dist/over.mp3"></audio>
+      src="/dist/over.mp3"></audio>
   </div>
 </template>
 
@@ -120,7 +121,8 @@ export default {
       rankView: false,
       audioDown: '',
       audioClear: '',
-      audioOver: ''
+      audioOver: '',
+      diffIndexY: 0
     }
   },
   created() {
@@ -142,12 +144,6 @@ export default {
     this.buttonEvent()
   },
   watch: {
-    shape(val) {
-      // console.table(val);
-    },
-    layoutColor(val) {
-      // console.table(val)
-    },
     shapeCoord(val, oldVal) {
       if (this.clear) {
         for (let coord of oldVal) {
@@ -197,10 +193,10 @@ export default {
       this.renderShape()
     },
     currentScore(val) {
-      console.log(val);
       if (val > this.bestScore) {
         this.bestScore = val
         localStorage.setItem('bestScore', val)
+        console.log('best:' + val);
       }
     },
     clearLine(val, oldVal) {
@@ -209,13 +205,16 @@ export default {
     },
     globalScore(val) {
       console.log(JSON.stringify(val));
-    }
+    },
+    shapeIndex(val, oldVal) {
+      this.diffIndexY =  val.y - oldVal.y
+    },
   },
   computed: {
     shapeCoord() {
       let arr = this.computedCoord(this.shape, this.shapeIndex)
       return arr
-    }
+    },
   },
   methods: {
     /**
@@ -263,7 +262,6 @@ export default {
       this.clear = true
       this.clearLine = 0
       this.randomShape()
-      // console.log(`顶点坐标 x:${shapeIndex.x} y:${shapeIndex.y}`);
     },
     initShapeIndex() {
       let mid = Math.ceil(this.colNum / 2)
@@ -371,7 +369,12 @@ export default {
         }
       }
       function arrowPause() {
-        console.log('pause');
+        that.rankView = !that.rankView
+        if(that.rankView) {
+          clearInterval(that.intervalObj)
+        } else {
+          that.handleAnimation(800)
+        }
       }
       function keyZ() {
         that.rotateShape()
@@ -555,8 +558,14 @@ export default {
       let pass = true
 
       let ID = setInterval(() => {
+        let diffIndexY = this.diffIndexY
         pass = this.moveDown()
         this.currentScore += 5
+
+        if (diffIndexY < 0) {
+          clearInterval(ID)
+        }
+
         for (let coord of this.shapeCoord) {
           if (coord.y + 1 > this.rowNum - 1) {
             clearInterval(ID)
