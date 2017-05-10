@@ -80,11 +80,11 @@
       </div>
     </div>
     <audio class="audio-down"
-      src="/dist/down.mp3"></audio>
+      src="./dist/down.mp3"></audio>
     <audio class="audio-clear"
-      src="/dist/clear.mp3"></audio>
+      src="./dist/clear.mp3"></audio>
     <audio class="audio-over"
-      src="/dist/over.mp3"></audio>
+      src="./dist/over.mp3"></audio>
   </div>
 </template>
 
