@@ -1,12 +1,10 @@
 <template>
   <div id="app">
     <div class="layout">
-      <div
-        class="layout-row"
-        v-for="row in layout">
-        <div
-          class="layout-cell"
-          v-for="cell in row">
+      <div class="layout-row"
+           v-for="row in layout">
+        <div class="layout-cell"
+             v-for="cell in row">
           {{ cell }}
         </div>
       </div>
@@ -17,7 +15,7 @@
 <script>
 export default {
   name: 'app',
-  data () {
+  data() {
     return {
       layout: [],
       rowNum: 0,
@@ -61,14 +59,14 @@ export default {
       }
     },
     initBlock() {
-      let blockArr = [[0, 0, 1],[1, 1, 1]]
+      let blockArr = [[0, 0, 1], [1, 1, 1]]
       let blockLen = blockArr[0].length
       let blockMid = Math.ceil(blockLen / 2)
 
       this.shapeCoord = []
 
-      for(let r = 0; r < this.shape.length; r++) {
-        for(let c = 0; c < this.shape[r].length; c++) {
+      for (let r = 0; r < this.shape.length; r++) {
+        for (let c = 0; c < this.shape[r].length; c++) {
           if (this.shape[r][c] == 1) {
             let obj = {
               x: this.shapeIndex.x + c,
@@ -85,7 +83,7 @@ export default {
         this.randomShape()
         let mid = Math.ceil(this.rowNum / 2)
 
-        for(let coord of this.lastShape) {
+        for (let coord of this.lastShape) {
           this.layout[coord.y][coord.x] = 1
         }
 
@@ -97,8 +95,8 @@ export default {
         return
       }
 
-      for(let r = 0; r < this.shape.length; r++) {
-        for(let c = 0; c < this.shape[r].length; c++) {
+      for (let r = 0; r < this.shape.length; r++) {
+        for (let c = 0; c < this.shape[r].length; c++) {
           if (this.shape[r][c] == 1) {
             this.layout[this.shapeIndex.y + r][this.shapeIndex.x + c] = this.shape[r][c]
           }
@@ -108,24 +106,24 @@ export default {
     randomShape() {
       let random = Math.floor(Math.random() * (6 - 1) + 1)
 
-      switch(1) {
+      switch (1) {
         case 1:
-          this.shape = [[0,1,0,0],[0,1,0,0],[0,1,1,0],[0,0,0,0]];
+          this.shape = [[0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 1, 0], [0, 0, 0, 0]];
           break;
         case 2:
-          this.shape = [[0,0,0,0],[0,1,1,0],[0,1,1,0],[0,0,0,0]];
+          this.shape = [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]];
           break;
         case 3:
-          this.shape = [[0,0,1,0],[0,0,1,0],[0,1,1,0],[0,0,0,0]];
+          this.shape = [[0, 0, 1, 0], [0, 0, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]];
           break;
         case 4:
-          this.shape = [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]];
+          this.shape = [[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]];
           break;
         case 5:
-          this.shape = [[0,0,0,0],[0,1,1,0],[0,0,1,1],[0,0,0,0]];
+          this.shape = [[0, 0, 0, 0], [0, 1, 1, 0], [0, 0, 1, 1], [0, 0, 0, 0]];
           break;
         case 6:
-          this.shape = [[0,0,0,0],[0,1,1,1],[0,0,1,0],[0,0,0,0]];
+          this.shape = [[0, 0, 0, 0], [0, 1, 1, 1], [0, 0, 1, 0], [0, 0, 0, 0]];
           break;
       }
     },
@@ -133,17 +131,17 @@ export default {
       let arr = []
       let arrLayout = this.layout
 
-      for(let r = 0; r < this.shape.length; r++) {
+      for (let r = 0; r < this.shape.length; r++) {
         arr[r] = []
-        for(let c = 0; c < this.shape[r].length; c++) {
+        for (let c = 0; c < this.shape[r].length; c++) {
           arr[r][c] = this.shape[this.shape.length - c - 1][r]
         }
       }
 
       let change = true
 
-      for(let r = 0; r < arr.length; r++) {
-        for(let c = 0; c < arr[r].length; c++) {
+      for (let r = 0; r < arr.length; r++) {
+        for (let c = 0; c < arr[r].length; c++) {
           if (arr[r][c] == 1) {
 
             if (this.layout[this.shapeIndex.y + r][this.shapeIndex.x + c] == 1) {
@@ -161,8 +159,8 @@ export default {
       }
 
       if (change) {
-        for(let r = 0; r < this.shape.length; r++) {
-          for(let c = 0; c < this.shape.length; c++) {
+        for (let r = 0; r < this.shape.length; r++) {
+          for (let c = 0; c < this.shape.length; c++) {
             if (this.shape[r][c] == 1) {
               arrLayout[this.shapeIndex.y + r][this.shapeIndex.x + c] = 0
             }
@@ -183,8 +181,8 @@ export default {
           let arrLayout = this.layout
           let x = this.shapeIndex.x - 1
           if (x >= 0) {
-            for(let r = 0; r < this.shape.length; r++) {
-              for(let c = 0; c < this.shape.length; c++) {
+            for (let r = 0; r < this.shape.length; r++) {
+              for (let c = 0; c < this.shape.length; c++) {
                 if (this.shape[r][c] == 1) {
                   arrLayout[this.shapeIndex.y + r][this.shapeIndex.x + c] = 0
                 }
@@ -197,8 +195,8 @@ export default {
           let arrLayout = this.layout
           let x = this.shapeIndex.x + 1
           if (x < this.rowNum - 3) {
-            for(let r = 0; r < this.shape.length; r++) {
-              for(let c = 0; c < this.shape.length; c++) {
+            for (let r = 0; r < this.shape.length; r++) {
+              for (let c = 0; c < this.shape.length; c++) {
                 if (this.shape[r][c] == 1) {
                   arrLayout[this.shapeIndex.y + r][this.shapeIndex.x + c] = 0
                 }
@@ -215,9 +213,9 @@ export default {
 
         this.lastShape = []
 
-        for(let r = 0; r < this.shape.length; r++) {
-          for(let c = 0; c < this.shape.length; c++) {
-            if (this.shape[r][c] == 1 ) {
+        for (let r = 0; r < this.shape.length; r++) {
+          for (let c = 0; c < this.shape.length; c++) {
+            if (this.shape[r][c] == 1) {
               let obj = {
                 x: this.shapeIndex.x + c,
                 y: this.shapeIndex.y + r
@@ -244,8 +242,8 @@ export default {
       return animation
     },
     collideDetection() {
-      for(let coord of this.shapeCoord) {
-        if (this.layout[coord.y][coord.x] == 1 && coord.x != 0  && coord.x != this.colNum - 3) {
+      for (let coord of this.shapeCoord) {
+        if (this.layout[coord.y][coord.x] == 1 && coord.x != 0 && coord.x != this.colNum - 3) {
 
           console.log(coord.y, coord.x);
 
@@ -255,21 +253,21 @@ export default {
       return false
     },
     handleClear() {
-      for(let r = 0;r < this.layout.length - 1; r++) {
+      for (let r = 0; r < this.layout.length - 1; r++) {
         let all = true
-        for(let c = 0; c < this.layout[r].length; c++) {
+        for (let c = 0; c < this.layout[r].length; c++) {
           if (this.layout[r][c] == 0) {
             all = false
           }
         }
         if (all) {
-          for(let i = 0; i < this.layout[r].length; i++) {
-            if (i !=0 && i != this.layout[r].length - 1 ) {
+          for (let i = 0; i < this.layout[r].length; i++) {
+            if (i != 0 && i != this.layout[r].length - 1) {
               this.layout[r][i] = 0
             }
           }
 
-          for(let j = r; j > 0; j--) {
+          for (let j = r; j > 0; j--) {
             this.layout[j] = this.layout[j - 1]
           }
         }

@@ -1,16 +1,13 @@
 <template>
   <div id="app">
-    <div
-      class="layout-container"
-      v-show="!rankView">
+    <div class="layout-container"
+         v-show="!rankView">
       <div class="layout">
-        <div
-          class="layout-row"
-          v-for="(row, rowIndex) in layout">
-          <div
-            class="layout-cell"
-            :class="layoutColor[rowIndex][cellIndex]"
-            v-for="(cell, cellIndex) in row">
+        <div class="layout-row"
+             v-for="(row, rowIndex) in layout">
+          <div class="layout-cell"
+               :class="layoutColor[rowIndex][cellIndex]"
+               v-for="(cell, cellIndex) in row">
           </div>
         </div>
       </div>
@@ -32,9 +29,8 @@
         </div>
       </div>
     </div>
-    <div
-      class="control"
-      v-show="!rankView">
+    <div class="control"
+         v-show="!rankView">
       <div class="control-left">
         <div class="button rotate-button"></div>
       </div>
@@ -51,12 +47,10 @@
         </div>
       </div>
     </div>
-    <div
-      class="rank-view"
-      v-show="rankView">
+    <div class="rank-view"
+         v-show="rankView">
       <div class="rank-container">
-        <div
-          class="person">
+        <div class="person">
           <div class="score">
             Score
           </div>
@@ -67,9 +61,8 @@
             Player
           </div>
         </div>
-        <div
-          class="person"
-          v-for="item in this.globalScore">
+        <div class="person"
+             v-for="item in this.globalScore">
           <div class="score">
             {{item.score}}
           </div>
@@ -85,9 +78,12 @@
         X
       </div>
     </div>
-    <audio class="audio-down" src="/dist/down.mp3"></audio>
-    <audio class="audio-clear" src="/dist/clear.mp3"></audio>
-    <audio class="audio-over" src="/dist/over.mp3"></audio>
+    <audio class="audio-down"
+           src="/dist/down.mp3"></audio>
+    <audio class="audio-clear"
+           src="/dist/clear.mp3"></audio>
+    <audio class="audio-over"
+           src="/dist/over.mp3"></audio>
   </div>
 </template>
 
@@ -99,7 +95,7 @@ import './assets/over.mp3'
 
 export default {
   name: 'app',
-  data () {
+  data() {
     return {
       layout: [],     //布局
       rowNum: 0,
@@ -154,7 +150,7 @@ export default {
     },
     shapeCoord(val, oldVal) {
       if (this.clear) {
-        for(let coord of oldVal) {
+        for (let coord of oldVal) {
           this.layout[coord.y][coord.x] = 0
           this.layoutColor[coord.y][coord.x] = ''
         }
@@ -171,12 +167,12 @@ export default {
           this.handleGameOver()
           return
         } else {
-          for(let r = 0; r < this.layout.length; r ++) {
+          for (let r = 0; r < this.layout.length; r++) {
             let clear = true
-            for(let c = 0; c < this.layout[r].length; c++) {
-               if (this.layout[r][c] == 0) {
-                 clear = false
-               }
+            for (let c = 0; c < this.layout[r].length; c++) {
+              if (this.layout[r][c] == 0) {
+                clear = false
+              }
             }
             if (clear) {
               let arr = []
@@ -185,7 +181,7 @@ export default {
               this.audioClear.play()
               this.layout.splice(r, 1)
               this.layoutColor.splice(r, 1)
-              for(let i = 0; i < this.colNum; i++) {
+              for (let i = 0; i < this.colNum; i++) {
                 arr.push(0)
                 arrColor.push('')
               }
@@ -229,12 +225,12 @@ export default {
      */
     initData() {
       let config = {
-        syncURL : 'https://vue-tetris.wilddogio.com'
+        syncURL: 'https://vue-tetris.wilddogio.com'
       }
       wilddog.initializeApp(config)
       this.$ref = wilddog.sync().ref()
 
-      this.$ref.on('value',(snapshot) => {
+      this.$ref.on('value', (snapshot) => {
         let data = snapshot.val()
         this.globalScore = JSON.parse(data.globalScore);
       })
@@ -249,12 +245,12 @@ export default {
         y: -1
       }
 
-      for(let r = 0; r < row; r++) {
+      for (let r = 0; r < row; r++) {
         arr.push([])
         arrColor.push([])
-        for(let c = 0; c < col; c++) {
-            arr[r].push(0)
-            arrColor[r].push('')
+        for (let c = 0; c < col; c++) {
+          arr[r].push(0)
+          arrColor[r].push('')
         }
       }
 
@@ -305,30 +301,30 @@ export default {
 
       this.lastReandomColor = reandomColor
 
-      switch(reandom) {
+      switch (reandom) {
         case 1:
-          this.shape = [[0,0,0,0],[0,0,1,0],[1,1,1,0],[0,0,0,0]];
+          this.shape = [[0, 0, 0, 0], [0, 0, 1, 0], [1, 1, 1, 0], [0, 0, 0, 0]];
           break;
         case 2:
-          this.shape = [[0,0,0,0],[0,1,1,0],[0,1,1,0],[0,0,0,0]];
+          this.shape = [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]];
           break;
         case 3:
-          this.shape = [[0,0,0,0],[0,1,0,0],[0,1,1,1],[0,0,0,0]];
+          this.shape = [[0, 0, 0, 0], [0, 1, 0, 0], [0, 1, 1, 1], [0, 0, 0, 0]];
           break;
         case 4:
-          this.shape = [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]];
+          this.shape = [[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]];
           break;
         case 5:
-          this.shape = [[0,0,0,0],[0,1,1,0],[0,0,1,1],[0,0,0,0]];
+          this.shape = [[0, 0, 0, 0], [0, 1, 1, 0], [0, 0, 1, 1], [0, 0, 0, 0]];
           break;
         case 6:
-          this.shape = [[0,0,0,0],[0,0,1,0],[0,1,1,1],[0,0,0,0]];
+          this.shape = [[0, 0, 0, 0], [0, 0, 1, 0], [0, 1, 1, 1], [0, 0, 0, 0]];
           break;
       }
 
     },
     renderShape() {
-      for(let coord of this.shapeCoord) {
+      for (let coord of this.shapeCoord) {
         this.layout[coord.y][coord.x] = 1
         this.layoutColor[coord.y][coord.x] = this.currentColor
       }
@@ -429,9 +425,9 @@ export default {
       let shapeCoord = []
       let pass = true
 
-      for(let r = 0; r < shape.length; r++) {
+      for (let r = 0; r < shape.length; r++) {
         rotatedShape[r] = []
-        for(let c = 0; c < shape[r].length; c++) {
+        for (let c = 0; c < shape[r].length; c++) {
           rotatedShape[r][c] = shape[shape.length - c - 1][r]
         }
       }
@@ -446,8 +442,8 @@ export default {
     computedCoord(shape, shapeIndex) {
       let arr = []
 
-      for(let r = 0; r < shape.length; r++) {
-        for(let c = 0; c < shape[r].length; c++) {
+      for (let r = 0; r < shape.length; r++) {
+        for (let c = 0; c < shape[r].length; c++) {
           if (shape[r][c] == 1) {
             let obj = {
               x: shapeIndex.x + c,
@@ -465,7 +461,6 @@ export default {
      */
     moveDown() {
       let shapeCoord = []
-      let shape = this.shape
       let pass = false
       let newShapeIndex = {
         x: this.shapeIndex.x,
@@ -497,7 +492,6 @@ export default {
     },
     moveLeft() {
       let shapeCoord = []
-      let shape = this.shape
       let pass = false
       let canDown = this.canMoveDown()
       let newShapeIndex = {
@@ -529,7 +523,6 @@ export default {
     },
     moveRight() {
       let shapeCoord = []
-      let shape = this.shape
       let pass = false
       let canDown = this.canMoveDown()
       let newShapeIndex = {
@@ -561,7 +554,7 @@ export default {
     moveDrop() {
       let pass = true
 
-      let ID = setInterval(()=>{
+      let ID = setInterval(() => {
         pass = this.moveDown()
         this.currentScore += 5
         for (let coord of this.shapeCoord) {
@@ -573,7 +566,7 @@ export default {
         if (pass == false) {
           clearInterval(ID)
         }
-      },0)
+      }, 0)
     },
     handleAnimation(time) {
       this.intervalObj = setInterval(() => {
@@ -617,7 +610,6 @@ export default {
     },
     canMoveDown() {
       let shapeCoord = []
-      let shape = this.shape
       let pass = false
       let newShapeIndex = {
         x: this.shapeIndex.x,
@@ -643,7 +635,7 @@ export default {
     colDetection(shapeCoord) {
       let pass = true
 
-      for(let coord of shapeCoord) {
+      for (let coord of shapeCoord) {
         if (coord.y > this.rowNum - 1 || coord.y < 0) {
           return false
         }
@@ -652,7 +644,7 @@ export default {
         }
         if (this.layout[coord.y][coord.x] == 1) {
           pass = false
-          for(let c of this.shapeCoord) {
+          for (let c of this.shapeCoord) {
             if (coord.y == c.y && coord.x == c.x) {
               pass = true
             }
@@ -675,7 +667,7 @@ export default {
 }
 
 body {
-  font-family: "SF Pro SC","SF Pro Text","SF Pro Icons","PingFang SC","Helvetica Neue","Helvetica","Arial",sans-serif;
+  font-family: "SF Pro SC", "SF Pro Text", "SF Pro Icons", "PingFang SC", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
 }
 
 #app {
@@ -742,7 +734,7 @@ body {
   /*margin-top: 1px;*/
 }
 
-.layout-right > div {
+.layout-right>div {
   display: flex;
   flex-direction: column;
   border: 1px solid #000;
@@ -757,7 +749,7 @@ body {
   margin-top: 10px;
 }
 
-.control > div {
+.control>div {
   width: 50%;
 }
 
@@ -767,9 +759,7 @@ body {
   justify-content: flex-end;
 }
 
-.control-left {
-
-}
+.control-left {}
 
 .control-left .rotate-button {
   width: 80px;
@@ -783,10 +773,11 @@ body {
   flex-direction: column;
 }
 
-.control-right > div {
+.control-right>div {
   display: flex;
   width: 120px;
 }
+
 .control-right .drop,
 .control-right .down {
   justify-content: center;
@@ -796,7 +787,7 @@ body {
   justify-content: space-between;
 }
 
-.control-right .button{
+.control-right .button {
   width: 45px;
   height: 45px;
   border-radius: 50%;
@@ -807,10 +798,10 @@ body {
   overflow: hidden;
   background-color: #fff;
   background: linear-gradient(rgb(222, 222, 222), rgb(253, 253, 253));
-  box-shadow: 0 3px 5px rgba(0,0,0,0.25),
-  inset 0 1px 0 rgba(255,255,255,0.3),
-  inset 0 -5px 5px rgba(100,100,100,0.1),
-  inset 0 5px 5px rgba(255,255,255,0.3);
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.25),
+  inset 0 1px 0 rgba(255, 255, 255, 0.3),
+  inset 0 -5px 5px rgba(100, 100, 100, 0.1),
+  inset 0 5px 5px rgba(255, 255, 255, 0.3);
   user-select: none;
 }
 
@@ -856,7 +847,7 @@ body {
   margin-bottom: 10px;
 }
 
-.rank-view .person > div {
+.rank-view .person>div {
   min-width: 4em;
 }
 
@@ -870,5 +861,4 @@ body {
   justify-content: center;
   align-items: center;
 }
-
 </style>
