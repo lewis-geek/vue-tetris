@@ -632,7 +632,6 @@ export default {
       } else {
         this.gameOver = true
       }
-      this.currentScore = 0
     },
     canMoveDown() {
       let shapeCoord = []
