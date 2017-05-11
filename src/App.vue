@@ -396,6 +396,7 @@ export default {
 
       layout.addEventListener('click', () => {
         if(this.gameOver) {
+          this.currentScore = 0
           this.initLayout(19, 10)
           this.handleAnimation(800)
           this.gameOver = false
