@@ -126,7 +126,8 @@ export default {
       audioClear: '',
       audioOver: '',
       diffIndexY: 0,
-      gameOver: false
+      gameOver: false,
+      initScore: false
     }
   },
   created() {
@@ -205,8 +206,10 @@ export default {
     },
     clearLine(val, oldVal) {
       let clearLineNum = val - oldVal
-      if(!this.gameOver) {
+      if(!this.initScore) {
         this.currentScore += clearLineNum * 100 * clearLineNum
+      } else {
+        this.initScore = false
       }
     },
     globalScore(val) {
@@ -602,6 +605,7 @@ export default {
       let lastGlobalScore = this.globalScore[this.globalScore.length - 1].score
       this.audioOver.currentTime = 0
       this.audioOver.play()
+      this.initScore = true
 
       if (lastGlobalScore <= this.currentScore) {
         MessageBox.alert('恭喜您进入全球榜').then(action => {
