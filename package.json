@@ -9,6 +9,7 @@
     "build": "cross-env NODE_ENV=production webpack --progress --hide-modules"
   },
   "dependencies": {
+    "mint-ui": "^2.2.6",
     "vue": "^2.2.1",
     "wilddog": "^2.5.6"
   },

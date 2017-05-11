@@ -2,7 +2,8 @@
   <div id="app">
     <div class="layout-container"
       v-show="!rankView">
-      <div class="layout">
+      <div class="layout"
+        :class="{'game-over': gameOver}">
         <div class="layout-row"
           v-for="(row, rowIndex) in layout">
           <div class="layout-cell"
@@ -80,19 +81,21 @@
       </div>
     </div>
     <audio class="audio-down"
-      src="./dist/down.mp3"></audio>
+      src="./vue-tetris/dist/down.mov"></audio>
     <audio class="audio-clear"
-      src="./dist/clear.mp3"></audio>
+      src="./vue-tetris/dist/clear.mov"></audio>
     <audio class="audio-over"
-      src="./dist/over.mp3"></audio>
+      src="./vue-tetris/dist/over.mov"></audio>
   </div>
 </template>
 
 <script>
 import wilddog from 'wilddog'
-import './assets/down.mp3'
-import './assets/clear.mp3'
-import './assets/over.mp3'
+import { MessageBox } from 'mint-ui'
+import 'mint-ui/lib/style.css'
+import './assets/down.mov'
+import './assets/clear.mov'
+import './assets/over.mov'
 
 export default {
   name: 'app',
@@ -122,7 +125,8 @@ export default {
       audioDown: '',
       audioClear: '',
       audioOver: '',
-      diffIndexY: 0
+      diffIndexY: 0,
+      gameOver: false
     }
   },
   created() {
@@ -207,7 +211,7 @@ export default {
       console.log(JSON.stringify(val));
     },
     shapeIndex(val, oldVal) {
-      this.diffIndexY =  val.y - oldVal.y
+      this.diffIndexY = val.y - oldVal.y
     },
   },
   computed: {
@@ -370,7 +374,7 @@ export default {
       }
       function arrowPause() {
         that.rankView = !that.rankView
-        if(that.rankView) {
+        if (that.rankView) {
           clearInterval(that.intervalObj)
         } else {
           that.handleAnimation(800)
@@ -388,6 +392,15 @@ export default {
       let downButton = document.querySelector('.down-button')
       let rankButton = document.querySelector('.globale-score')
       let rankClose = document.querySelector('.rank-view-close')
+      let layout = document.querySelector('.layout')
+
+      layout.addEventListener('click', () => {
+        if(this.gameOver) {
+          this.initLayout(19, 10)
+          this.handleAnimation(800)
+          this.gameOver = false
+        }
+      })
 
       rotateButton.addEventListener('click', () => {
         this.rotateShape()
@@ -586,35 +599,35 @@ export default {
       let lastGlobalScore = this.globalScore[this.globalScore.length - 1].score
       this.audioOver.currentTime = 0
       this.audioOver.play()
+
       if (lastGlobalScore <= this.currentScore) {
-        alert('恭喜您进入全球榜!')
-        let string = prompt('请留下您的大名')
+        MessageBox.alert('恭喜您进入全球榜').then(action => {
+          MessageBox.prompt('请留下您的大名').then((value, action) => {
+            this.gameOver = true
+            let string = value.value
+            let obj = {
+              score: this.currentScore,
+              line: this.clearLine,
+              string: string
+            }
 
-        let obj = {
-          score: this.currentScore,
-          line: this.clearLine,
-          string: string
-        }
+            this.globalScore.pop()
+            this.globalScore.push(obj)
 
-        this.globalScore.pop()
-        this.globalScore.push(obj)
+            this.globalScore.sort((a, b) => {
+              return b.score - a.score
+            })
 
-        this.globalScore.sort((a, b) => {
-          return b.score - a.score
+            let globalScoreJSON = JSON.stringify(this.globalScore);
+
+            this.$ref.set({
+              'globalScore': globalScoreJSON
+            })
+          }).catch( e => {
+            console.log(e)
+            this.gameOver = true
+          })
         })
-
-        let globalScoreJSON = JSON.stringify(this.globalScore);
-
-        this.$ref.set({
-          'globalScore': globalScoreJSON
-        })
-      }
-
-      let again = confirm('再来一局？');
-
-      if (again) {
-        this.initLayout(19, 10)
-        this.handleAnimation(800)
       }
     },
     canMoveDown() {
@@ -695,6 +708,7 @@ body {
 }
 
 .layout {
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -702,6 +716,26 @@ body {
   border: 1px solid #000;
   border-radius: 3px;
   padding: 5px;
+}
+
+.layout.game-over::after {
+  content: '再来一局';
+  position: absolute;
+  padding: 5px;
+  /*background-color: red;*/
+  border-radius: 5px;
+  color: #fff;
+  transform: translateY(-100%);
+}
+
+.layout.game-over::before {
+  content: '';
+  position: absolute;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  top: 0;
+  background-color: rgba(0, 0, 0, .5)
 }
 
 .layout-row {
@@ -739,10 +773,6 @@ body {
   margin-left: 10px;
 }
 
-.layout-right .best-score {
-  /*margin-top: 1px;*/
-}
-
 .layout-right>div {
   display: flex;
   flex-direction: column;
@@ -767,8 +797,6 @@ body {
   align-items: center;
   justify-content: flex-end;
 }
-
-.control-left {}
 
 .control-left .rotate-button {
   width: 80px;

@@ -4,8 +4,8 @@ var webpack = require('webpack')
 module.exports = {
   entry: './src/main.js',
   output: {
-    path: path.resolve(__dirname, './dist'),
-    publicPath: '/dist/',
+    path: path.resolve(__dirname, './vue-tetrisdist'),
+    publicPath: '/vue-tetris/dist/',
     filename: 'build.js'
   },
   module: {
@@ -29,7 +29,7 @@ module.exports = {
         exclude: /node_modules/
       },
       {
-        test: /\.(png|jpg|gif|svg|mp3)$/,
+        test: /\.(png|jpg|gif|svg|mp3|mov)$/,
         loader: 'file-loader',
         options: {
           name: '[name].[ext]?[hash]'
