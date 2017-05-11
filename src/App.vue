@@ -81,11 +81,11 @@
       </div>
     </div>
     <audio class="audio-down"
-      src="./vue-tetris/dist/down.mov"></audio>
+      src="./dist/down.mov"></audio>
     <audio class="audio-clear"
-      src="./vue-tetris/dist/clear.mov"></audio>
+      src="./dist/clear.mov"></audio>
     <audio class="audio-over"
-      src="./vue-tetris/dist/over.mov"></audio>
+      src="./dist/over.mov"></audio>
   </div>
 </template>
 
@@ -628,6 +628,8 @@ export default {
             this.gameOver = true
           })
         })
+      } else {
+        this.gameOver = true
       }
     },
     canMoveDown() {
