@@ -699,7 +699,6 @@ body {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  /*justify-content: space-between;*/
   padding: 15px 0 10px;
   box-sizing: border-box;
 }
@@ -723,11 +722,12 @@ body {
 .layout.game-over::after {
   content: '再来一局';
   position: absolute;
+  left: 50%;
+  top: 50%;
   padding: 5px;
-  /*background-color: red;*/
   border-radius: 5px;
   color: #fff;
-  transform: translateY(-100%);
+  transform: translate(-50%, -140%);
 }
 
 .layout.game-over::before {
