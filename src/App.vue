@@ -205,7 +205,9 @@ export default {
     },
     clearLine(val, oldVal) {
       let clearLineNum = val - oldVal
-      this.currentScore += clearLineNum * 100 * clearLineNum
+      if(!this.gameOver) {
+        this.currentScore += clearLineNum * 100 * clearLineNum
+      }
     },
     globalScore(val) {
       console.log(JSON.stringify(val));
