@@ -4,7 +4,7 @@ var webpack = require('webpack')
 module.exports = {
   entry: './src/main.js',
   output: {
-    path: path.resolve(__dirname, './vue-tetrisdist'),
+    path: path.resolve(__dirname, './vue-tetris/dist'),
     publicPath: '/vue-tetris/dist/',
     filename: 'build.js'
   },
@@ -53,8 +53,11 @@ module.exports = {
 }
 
 if (process.env.NODE_ENV === 'production') {
-  module.exports.devtool = '#source-map'
+  module.exports.devtool = '#source-map';
   // http://vue-loader.vuejs.org/en/workflow/production.html
+  module.exports.output.publicPath = '/dist/'
+  module.exports.output.path = path.resolve(__dirname, './dist'),
+
   module.exports.plugins = (module.exports.plugins || []).concat([
     new webpack.DefinePlugin({
       'process.env': {
