@@ -109,7 +109,7 @@ export default {
         x: 0,
         y: 0
       },              //图形顶点
-      // shapeCoord: [], //图形的全部坐标
+      //shapeCoord: [], //图形的全部坐标
       lastShape: [],   //更新前的图形
       clear: true,
       intervalObj: -1,
@@ -206,7 +206,7 @@ export default {
     },
     clearLine(val, oldVal) {
       let clearLineNum = val - oldVal
-      if(!this.initScore) {
+      if (!this.initScore) {
         this.currentScore += clearLineNum * 100 * clearLineNum
       } else {
         this.initScore = false
@@ -400,7 +400,7 @@ export default {
       let layout = document.querySelector('.layout')
 
       layout.addEventListener('click', () => {
-        if(this.gameOver) {
+        if (this.gameOver) {
           this.currentScore = 0
           this.initLayout(19, 10)
           this.handleAnimation(800)
@@ -630,8 +630,9 @@ export default {
             this.$ref.set({
               'globalScore': globalScoreJSON
             })
-          }).catch( e => {
+          }).catch(e => {
             console.log(e)
+            this.currentScore = 0
             this.gameOver = true
           })
         })
