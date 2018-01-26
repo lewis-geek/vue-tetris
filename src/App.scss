@@ -1,0 +1,213 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'SF Pro SC', 'SF Pro Text', 'SF Pro Icons', 'PingFang SC', 'Helvetica Neue', 'Helvetica', 'Arial',
+    sans-serif;
+}
+
+#app {
+  background-color: #223436;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 15px 0 10px;
+  box-sizing: border-box;
+}
+
+.layout-container {
+  display: flex;
+  justify-content: center;
+}
+
+.layout {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #000;
+  border-radius: 3px;
+  padding: 5px;
+}
+
+.layout.game-over::after {
+  content: '再来一局';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  padding: 5px;
+  border-radius: 5px;
+  color: #fff;
+  transform: translate(-50%, -140%);
+}
+
+.layout.game-over::before {
+  content: '';
+  position: absolute;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  top: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.layout-row {
+  display: flex;
+}
+
+.layout-cell {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #192122;
+  margin: 0.5px;
+  border-radius: 2px;
+}
+
+.layout-cell {
+  &.turquoise {
+    background-color: #f1c40f;
+  }
+  &.emerald {
+    background-color: #2ecc71;
+  }
+  &.peter-river {
+    background-color: #3498db;
+  }
+  &.amethyst {
+    background-color: #9b59b6;
+  }
+}
+
+.layout-right {
+  margin-left: 10px;
+}
+
+.layout-right > div {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #000;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 5px;
+  border-radius: 3px;
+}
+
+.control {
+  display: flex;
+  margin-top: 10px;
+}
+
+.control > div {
+  width: 50%;
+}
+
+.control-left {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.control-left .rotate-button {
+  width: 80px;
+  height: 80px;
+  margin-right: 40px;
+  border-radius: 50%;
+}
+
+.control-right {
+  display: flex;
+  flex-direction: column;
+}
+
+.control-right > div {
+  display: flex;
+  width: 120px;
+}
+
+.control-right .drop,
+.control-right .down {
+  justify-content: center;
+}
+
+.control-right .left-right {
+  justify-content: space-between;
+}
+
+.control-right .button {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+}
+
+.control .button {
+  position: relative;
+  overflow: hidden;
+  background-color: #fff;
+  background: linear-gradient(rgb(222, 222, 222), rgb(253, 253, 253));
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -5px 5px rgba(100, 100, 100, 0.1), inset 0 5px 5px rgba(255, 255, 255, 0.3);
+  user-select: none;
+}
+
+.control .button:active::after {
+  position: absolute;
+  content: '';
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.control .drop-button {
+  transform: translateY(5px);
+}
+
+.control .down-button {
+  transform: translateY(-5px);
+}
+
+.rank-view {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #edd;
+}
+
+.rank-container {
+  padding: 10px 5px;
+  border: 1px solid #edd;
+  border-radius: 3px;
+}
+
+.rank-view .person {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-width: 65vw;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.rank-view .person > div {
+  min-width: 4em;
+}
+
+.rank-view-close {
+  margin-top: 20px;
+  width: 25px;
+  height: 25px;
+  border: 1px solid #edd;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
